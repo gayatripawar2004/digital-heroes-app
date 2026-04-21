@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Digital Heroes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">✨ Digital Heroes - Admin</a>
+      <div class="ms-auto">
+        <a href="/logout" class="btn btn-outline-light btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <div class="row mb-4">
+      <div class="col">
+        <h2>Admin Dashboard</h2>
+        <p class="text-muted">Manage users, draws, charities, and winners.</p>
+      </div>
+    </div>
+
+   
+    <div class="row g-4 mb-5">
+      <div class="col-md-3">
+        <div class="card shadow-sm bg-primary text-white">
+          <div class="card-body">
+            <h5 class="card-title">Total Users</h5>
+            <h2 class="display-6"><%= userCount %></h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm bg-success text-white">
+          <div class="card-body">
+            <h5 class="card-title">Prize Pool</h5>
+            <h2 class="display-6">$<%= totalPrizePool %></h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm bg-info text-white">
+          <div class="card-body">
+            <h5 class="card-title">Charity Donations</h5>
+            <h2 class="display-6">$<%= charityTotal %></h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm bg-warning text-dark">
+          <div class="card-body">
+            <h5 class="card-title">Total Draws</h5>
+            <h2 class="display-6"><%= drawsCount %></h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">👥 User Management</h5>
+            <p class="card-text">View and edit user profiles, manage subscriptions.</p>
+            <a href="/admin/users" class="btn btn-outline-primary btn-sm">Manage Users</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">🎲 Draw Management</h5>
+            <p class="card-text">Run draws, simulate, publish results.</p>
+            <form action="/admin/run-draw" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-outline-primary btn-sm">Run Draw</button>
+            </form>
+            <a href="/admin/draws" class="btn btn-outline-secondary btn-sm">View Draws</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">💖 Charity Management</h5>
+            <p class="card-text">Add, edit, delete charities.</p>
+            <a href="/admin/charities" class="btn btn-outline-primary btn-sm">Manage Charities</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">🏆 Winners Management</h5>
+            <p class="card-text">Verify submissions, mark payouts.</p>
+            <a href="/admin/winners" class="btn btn-outline-primary btn-sm">Manage Winners</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">📊 Reports & Analytics</h5>
+            <p class="card-text">Detailed reports and statistics.</p>
+            <a href="/admin/reports" class="btn btn-outline-primary btn-sm">View Reports</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+    
+<div class="card mt-4">
+  <div class="card-header bg-primary text-white">
+    🏆 Winners List & Verification
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-bordered mb-0">
+      <thead>
+        <tr><th>User</th><th>Draw Date</th><th>Amount ($)</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <% if (winners && winners.length) { %>
+          <% winners.forEach(w => { %>
+            <tr>
+              <td><%= w.users.name %><br><small><%= w.users.email %></small></td>
+              <td><%= new Date(w.draws.created_at).toLocaleDateString() %></td>
+              <td>$<%= w.amount %></td>
+              <td>
+                <% if (w.status === 'paid') { %>
+                  <span class="badge bg-success">Paid</span>
+                <% } else { %>
+                  <span class="badge bg-warning">Pending</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (w.status !== 'paid') { %>
+                  <form action="/admin/verify-payout" method="POST" class="d-inline">
+                    <input type="hidden" name="winner_id" value="<%= w.id %>">
+                    <button type="submit" class="btn btn-sm btn-success">Mark as Paid</button>
+                  </form>
+                <% } else { %>
+                  <span class="text-muted">Verified</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="5" class="text-center">No winners yet.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+   
+    <div class="row mt-5">
+      <div class="col">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Recent Draw Results</h5>
+            <% if (draws && draws.length) { %>
+              <ul class="list-group">
+                <% draws.slice(0, 5).forEach(d => { %>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span><%= new Date(d.created_at).toLocaleString() %></span>
+                    <span class="badge bg-secondary">Numbers: <%= d.result %></span>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } else { %>
+              <p class="text-muted">No draws yet. Click "Run Draw" to start.</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="mt-5 text-center text-muted small">
+      &copy; 2026 Digital Heroes – Admin Panel
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

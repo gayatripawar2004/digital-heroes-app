@@ -9,26 +9,27 @@ exports.showLogin = (req, res) => {
 
 exports.showSignup = async (req, res) => {
  const { data: charities, error } = await supabase.from('charities').select('*');
-console.log("ERROR:", error);
-console.log("CHARITIES:", charities);
+
   res.render('auth/signup', { charities });
   
 };
 
 exports.signup = async (req, res) => {
   const { name, email, password, charity_id } = req.body;
-
   const hashedPassword = await bcrypt.hash(password, 10);
   const role = email === 'admin@example.com' ? 'admin' : 'user';
 
   const { data, error } = await supabase
     .from('users')
-    .insert([{ name, email, password: hashedPassword, role, charity_id }])
+    .insert([{ 
+      name, email, password: hashedPassword, role, 
+      charity_id: parseInt(charity_id), 
+      charity_percentage: 10 
+    }])
     .select()
     .single();
 
   if (error) return res.send('Signup error: ' + error.message);
-
   res.redirect('/login');
 };
 
